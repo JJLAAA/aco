@@ -1,7 +1,7 @@
 body{
     margin: 0px;
     padding: 0px;
-    background-color: #16a085;
+    background-color: #FCE6C9;
     position: relative;
 }
 #gridBg{
@@ -20,10 +20,10 @@ body{
     background-color: #abc123;
 }
 .home{
-    background-color: #407D94;
+    background-color: #00FFFF;
 }
 .barrier{
-    background-color: #637342;
+    background-color: #B0171F;
 }
 .pheromone{
     background-color: #264863;
@@ -32,7 +32,7 @@ body{
     position: absolute;
     width: 20px;
     height: 20px;
-    background-color: #fff;
+    background-color: #B0E0E6;
     -webkit-transition: all 1s linear;
     transition: all 1s linear;
     border-radius: 50%;
@@ -121,7 +121,7 @@ body{
 #welcome .content h1{
     width: 100%;
     text-align: center;
-    color: #fff;
+    color: #FFD700;
     font-size: 15px;
 }
 #welcome .author{
@@ -182,7 +182,7 @@ body{
     height: 40px;
     line-height: 40px;
     background-color: #16a085;
-    color: #fff;
+    color: #FFD700;
     text-align: center;
     margin-top: 7%;
 }
