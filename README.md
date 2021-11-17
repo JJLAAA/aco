@@ -15,8 +15,8 @@ npm run start
 
 ```
 // 静态变量
-World.BASE_PHEROMONE=1; //
-World.CHANGE_MAX_VALUE=0.02; // 突变概率
+World.BASE_PHEROMONE=1; // 基础信息素
+World.CHANGE_MAX_VALUE=0.02; // 蚂蚁下一步方向的突变概率
 World.ANT_NUMBER=50; // 蚂蚁数量
 
 

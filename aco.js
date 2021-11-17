@@ -37,7 +37,7 @@ var World = require("./entity/World.js");
         function _run() {
             if (!isRun) {
                 isRun = true;
-                // 渲染信息素
+                // 渲染环境信息素
                 world.volatitlePheromone();
                 // 不断的渲染蚂蚁，直到达到设置的数量
                 if (antList.length < World.ANT_NUMBER) {

@@ -1,17 +1,12 @@
-/**
- * @Author: BreezeDust
- * @Date:   2016-07-04
- * @Email:  breezedust.com@gmail.com
- * @Last modified by:   BreezeDust
- * @Last modified time: 2016-07-10
- */
-
+// 蚂蚁行为模型
 var World = require("./World.js");
 var Position = require("./Position.js");
 var Direction = require("./Direction.js");
 
+// 构造函数
 function Ant(word) {
     this._word = word;
+    // 走过的位置
     this.checkList = [];
     this.homePosition;
     this.foodPosition;
@@ -21,7 +16,7 @@ function Ant(word) {
 
     this.dom;
     this.step;
-
+    // 初始化
     this._init();
 }
 
@@ -35,8 +30,8 @@ Ant.CHECK_BARRIER = 102;
 Ant.CHECK_FOOD = 103;
 Ant.CHECK_HOME = 104;
 
-
-Ant.lunpandu = function (whell) { //轮盘赌
+//轮盘赌，用来随机化运动方向
+Ant.lunpandu = function (whell) {
     var nowP = Math.random();
     var m = 0;
     var point = 0;
@@ -49,22 +44,21 @@ Ant.lunpandu = function (whell) { //轮盘赌
     }
     return point;
 }
+
 // 蚂蚁初始化
 Ant.prototype._init = function () {
 
-    // 初始化不同的方向
-
+    // 蚂蚁的运动距离
     this.step = 0;
     this._setStatus(Ant.STATUS_FIND_FOOD);
     this.homePosition = this._word.map[parseInt(this._word.xl / 2)][parseInt(this._word.yl / 2)];
-    // TODO  干掉可以调整智能寻路
     this.foodPosition = null;
-    // TODO
-
-
     this.checkList = [];
+    // 判断下一步的方向
     this._findPosition(this.homePosition, true);
+    // 蚂蚁从家出发
     this._addCheckList(this.homePosition);
+    // TODO:?
     this._word.addCheckList(this.homePosition);
 
     if (this.dom == null) {
@@ -79,6 +73,7 @@ Ant.prototype._init = function () {
         top: this.homePosition.y * 20
     });
 }
+
 Ant.prototype._getP = function (position, status) {
     var value = 0;
     if (status == Ant.STATUS_FIND_FOOD) {
@@ -95,9 +90,12 @@ Ant.prototype._getP = function (position, status) {
     }
     return value <= 0.1 ? 0 : value;
 };
+
+// 蚂蚁移动留下信息素
 Ant.prototype._leavePheromone = function (position) {
     position.leavePheromone(this._getP(position, this.status), this.status);
 }
+
 Ant.prototype._check = function (position) {
     if (position == null) {
         return Ant.CHECK_BARRIER;
@@ -114,28 +112,37 @@ Ant.prototype._check = function (position) {
     return Ant.CHECK_FOOD;
 
 }
+
+// 设置蚂蚁的状态
 Ant.prototype._setStatus = function (status) {
     this.status = status;
 }
+
 // 蚂蚁运动
 Ant.prototype.move = function () {
     this.step++;
 
     var lastPosition = this.checkList[this.checkList.length - 1];
 
+    // 判断下一步的方向
     var newPosition = this._findPosition(lastPosition);
 
-    // 没有信息素时，回家
+    // 没有信息素时，直接回家
     if (this._getP(lastPosition, this.status) <= World.minPheromone) {
         this._init();
         return;
     }
+
+    // 检查新的位置的状态
     var check = this._check(newPosition);
     if (check == Ant.CHECK_BARRIER) {
+        // 如果遇到障碍物，随机一个运动方向
         this.dp = Math.floor(Math.random() * Direction.M.length);
     } else if (check == Ant.CHECK_NOMARL) {
+        // 正常位置，直接移动
         this._move(newPosition);
     } else if (check == Ant.CHECK_FOOD) {
+        // 如果遇到食物
         this.step = 0;
         this.checkList = [];
         this.foodPosition = newPosition;
@@ -143,6 +150,7 @@ Ant.prototype.move = function () {
         this._move(newPosition);
         this.dom.addClass("green");
     } else if (check == Ant.CHECK_HOME) {
+        // 如果回到家，就重新初始化
         this._init();
         // if(this.status==Ant.STATUS_FIND_FOOD){
         //     this._move(newPosition);
@@ -153,18 +161,22 @@ Ant.prototype.move = function () {
     }
 };
 
+// 判断下一步的方向
 Ant.prototype._findPosition = function (lastPosition, isStart) {
+
+    // 使用轮盘赌的方式判断下一次的运动方向
     var changeWhell = [0.4, 0.2, World.CHANGE_MAX_VALUE, 0.4 - World.CHANGE_MAX_VALUE];
     var change = changeWhell[Ant.lunpandu(changeWhell)];
-    // 探测信息素
+
     var findStatus = Ant.STATUS_CARRY_FOOD;
     if (this.status == Ant.STATUS_CARRY_FOOD) {
         findStatus = Ant.STATUS_FIND_FOOD;
     }
     if (this.status == Ant.STATUS_FIND_FOOD && change <= World.CHANGE_MAX_VALUE) {
-        // console.log("===>","change",change);
+        // 突变，方向随机
         this.dp = Math.floor(Math.random() * Direction.M.length);
     } else {
+        // 探测信息素，跟着信息素走
         var pheromoneList = [];
         var allPheromone = 0;
         for (var j = 1; j <= 1; j++) {
@@ -182,10 +194,8 @@ Ant.prototype._findPosition = function (lastPosition, isStart) {
                         allPheromone += checkP.getP(findStatus);
                         pheromoneList.push(checkP);
                     }
-
                 }
             }
-
         }
         this.lastStatus = this.status;
         if (allPheromone > 0) {
@@ -217,6 +227,7 @@ Ant.prototype._findPosition = function (lastPosition, isStart) {
 
     return lastPosition.move(Direction.M[this.dp], this._word.map);
 };
+
 Ant.getNewDirection = function (startP, endP) {
     var direction = [endP.x - startP.x, endP.y - startP.y];
     if (direction[0] != 0) {
@@ -227,6 +238,7 @@ Ant.getNewDirection = function (startP, endP) {
     }
     return Direction.getDP(direction);
 }
+
 Ant.prototype._addCheckList = function (position) {
     var insertIndex = this._getCheckedIndex(position);
     if (insertIndex >= 0) {
@@ -234,6 +246,7 @@ Ant.prototype._addCheckList = function (position) {
     }
     this.checkList.push(position);
 };
+
 Ant.prototype._getCheckedIndex = function (position) {
     for (var i = 0; i < this.checkList.length; i++) {
         if (position == this.checkList[i]) {
@@ -242,9 +255,12 @@ Ant.prototype._getCheckedIndex = function (position) {
     }
     return -1;
 };
+
+// 实现蚂蚁移动的效果
 Ant.prototype._move = function (newPosition) {
     this._addCheckList(newPosition);
     this._word.addCheckList(newPosition);
+    // 留下信息素
     this._leavePheromone(newPosition);
     this.dom.css({
         left: newPosition.x * 20,
